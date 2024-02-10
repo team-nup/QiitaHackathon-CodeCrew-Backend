@@ -21,7 +21,7 @@ async def leave_room(websocket: WebSocket, room_name: str):
 async def send_message(room_name: str, data: dict):
     user_name = data.get("userName")
     message = data.get("message")
-    action = data.get("action") # target || message
+    action = data.get("action") # join || message || leave
     
     response_data = {
         "userName": user_name,
@@ -29,12 +29,14 @@ async def send_message(room_name: str, data: dict):
         "action": action
     }
     
+    print(response_data)
+    print(room_websockets)
 
     for ws in room_websockets.get(room_name, []):
         await ws.send_text(json.dumps(response_data))
 
 async def websocket_endpoint(websocket: WebSocket, room_name: str,):
-    await join_room(websocket, room_name, target)
+    await join_room(websocket, room_name)
 
     try:
         while True:
