@@ -19,24 +19,30 @@ async def leave_room(websocket: WebSocket, room_name: str):
         del room_websockets[room_name]
         
 async def send_message(room_name: str, data: dict):
-    userName = data.get("userName")
+    user_name = data.get("userName")
     message = data.get("message")
+    action = data.get("action") # join || message || leave
     
     response_data = {
-        "userName": "testUser",
-        "message": message
+        "userName": user_name,
+        "message": message,
+        "action": action
     }
+    
+    print(response_data)
+    print(room_websockets)
+
     for ws in room_websockets.get(room_name, []):
         await ws.send_text(json.dumps(response_data))
 
-async def websocket_endpoint(websocket: WebSocket, room_name: str):
+async def websocket_endpoint(websocket: WebSocket, room_name: str,):
     await join_room(websocket, room_name)
 
     try:
         while True:
             data = await websocket.receive_text()
             data = json.loads(data)
-            await send_message(websocket, room_name, data)
+            await send_message(room_name, data)
                 
     except WebSocketDisconnect:
         await leave_room(websocket, room_name)
